@@ -1,0 +1,21 @@
+// Cloudflare Worker for the portfolio site.
+//
+// This Worker has no `main` script: it only serves the files `astro build` writes to ./dist
+// (Workers static assets). Compare with forge/wrangler.jsonc, which points `main` at the
+// TanStack Start server entry because Forge renders pages and runs server functions per request.
+//
+// Secrets: none. Deploy auth (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID) lives in GitHub
+// Actions secrets, never in this file.
+//
+// Custom domain: added as a `routes` entry with `custom_domain: true` once the domain is
+// registered and its zone is active in Cloudflare (stage E0, manual step).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "portfolio",
+  "compatibility_date": "2026-10-30",
+  "assets": {
+    "directory": "./dist",
+    // Unknown paths get dist/404.html with HTTP status 404 instead of a bare platform error.
+    "not_found_handling": "404-page"
+  }
+}

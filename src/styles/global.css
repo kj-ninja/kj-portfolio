@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/*
+ * Colour tokens. Light is the default; dark follows the OS setting.
+ * Components use the Tailwind utilities generated from @theme (bg-surface, text-ink, ...),
+ * so a theme change only touches this file.
+ */
+@theme {
+  --color-surface: oklch(0.985 0.002 260);
+  --color-ink: oklch(0.22 0.02 260);
+  --color-ink-muted: oklch(0.45 0.02 260);
+  --color-accent: oklch(0.52 0.17 255);
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: oklch(0.17 0.02 260);
+    --color-ink: oklch(0.94 0.01 260);
+    --color-ink-muted: oklch(0.72 0.02 260);
+    --color-accent: oklch(0.74 0.14 255);
+  }
+}
+
+:root {
+  color-scheme: light dark;
+}
