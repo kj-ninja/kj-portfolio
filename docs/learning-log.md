@@ -47,7 +47,9 @@ Stage: E0, E1
 
 E0, 2026-10-30: `wrangler deploy --dry-run` for the portfolio takes `dist/` (4 files) as assets and uploads a
 Worker of 0.31 KiB (0.22 KiB gzip), because there is no `main` script: Cloudflare serves the files directly.
-Open question: wrangler prints "Read 5 files" for those 4 files; not explained yet.
+The dry-run prints "Read 5 files" for those 4 files. The first real deploy (2026-10-31, CI run 41059211446,
+attempt 2) printed "Uploaded 4 files" and went live at `https://portfolio.kj-forge.workers.dev`, so the upload
+matches `dist/`. Why the dry-run counts 5 is still unexplained (hypothesis: it also counts the `_astro/` directory).
 Forge sets `"main": "@tanstack/react-start/server-entry"` and the `nodejs_compat` flag, because its Worker renders
 pages and runs server functions on every request.
 

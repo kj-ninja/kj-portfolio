@@ -7,12 +7,18 @@
 // Secrets: none. Deploy auth (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID) lives in GitHub
 // Actions secrets, never in this file.
 //
-// Custom domain: added as a `routes` entry with `custom_domain: true` once the domain is
-// registered and its zone is active in Cloudflare (stage E0, manual step).
+// Custom domain: `custom_domain: true` makes Cloudflare create the DNS record and the TLS
+// certificate for the hostname on deploy. The zone (krzysztofjakubiak.com) must be active in the
+// same Cloudflare account as this Worker.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "portfolio",
   "compatibility_date": "2026-10-30",
+  "routes": [{ "pattern": "krzysztofjakubiak.com", "custom_domain": true }],
+  // With `routes` set, wrangler defaults `workers_dev` to false and would switch off
+  // portfolio.kj-forge.workers.dev. Keep it on as a fallback until the domain is confirmed working,
+  // then set this to false in a separate change.
+  "workers_dev": true,
   "assets": {
     "directory": "./dist",
     // Unknown paths get dist/404.html with HTTP status 404 instead of a bare platform error.

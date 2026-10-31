@@ -7,8 +7,10 @@ import { defineConfig } from "astro/config";
 // Cloudflare Worker serves it as static assets (see wrangler.jsonc). No adapter is needed
 // until a page has to render on request.
 //
-// `site` is set once the domain is registered; it drives canonical URLs and the sitemap (E2).
+// `site` is the production origin. Astro uses it to build absolute URLs (`Astro.site`), which the
+// canonical link and the sitemap will rely on (E2).
 export default defineConfig({
+  site: "https://krzysztofjakubiak.com",
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],

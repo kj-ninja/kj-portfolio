@@ -7,7 +7,7 @@ Tailwind CSS 4, and served by a Cloudflare Worker as static assets.
 
 ## Run locally
 
-Requirements: Node ≥ 22.12 (see `.nvmrc`) and Bun 1.4.
+Requirements: Node ≥ 22.23.4 (required by Astro 7.4.2+, see `.nvmrc`) and Bun 1.4.
 
 ```bash
 bun install --frozen-lockfile
@@ -35,16 +35,20 @@ CI (`.github/workflows/ci.yml`) runs all of them on every pull request and on `m
 ## Deploy
 
 A push to `main` that passes CI deploys `dist/` to the Cloudflare Worker named `portfolio`
-(`wrangler.jsonc`). A failed deploy leaves the previous version live.
+(`wrangler.jsonc`), served at https://krzysztofjakubiak.com and, as a fallback during the switch,
+https://portfolio.kj-forge.workers.dev. A failed deploy leaves the previous version live.
 
-One-time setup (manual, in the Cloudflare and GitHub dashboards):
+One-time setup (manual, in the Cloudflare and GitHub dashboards; done on 2026-10-31):
 
-1. Register the domain in Cloudflare Registrar; its DNS zone is then active in the same account.
-2. Create an API token with the _Edit Cloudflare Workers_ template, scoped to this account only.
-3. In the GitHub repository: Settings → Secrets and variables → Actions → add
-   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Create a `production` environment.
-4. After the first deploy, attach the domain: add to `wrangler.jsonc`
-   `"routes": [{ "pattern": "<domain>", "custom_domain": true }]` and set `site` in `astro.config.mjs`.
+1. The domain `krzysztofjakubiak.com` is registered in Cloudflare Registrar, in the same Cloudflare
+   account as the Worker, so its DNS zone is active there.
+2. An Account API token made from the _Edit Cloudflare Workers_ template, scoped to that one account.
+   It expires on 2027-10-31; renew it and update the secret before then.
+3. In the GitHub repository, the `production` environment allows deployments from `main` only and
+   holds the secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (environment secrets, not
+   repository secrets, so jobs on other branches cannot read them).
+4. The domain is attached in `wrangler.jsonc` (`routes` with `custom_domain: true`); Cloudflare creates
+   its DNS record and certificate on deploy. `site` in `astro.config.mjs` matches it.
 
 ## Docs
 
