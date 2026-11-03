@@ -39,10 +39,11 @@ const en = {
   "lab.eyebrow": "Lab",
   "lab.title": "Frontend concepts that keep coming up in interviews, taken apart.",
   "lab.intro":
-    "One concept per entry, one list. A plain explanation, real code, a sandbox you can click, and my own conclusions. No frameworks war, no 40-minute reads.",
+    "One concept per entry, one list. A plain explanation, real code, a sandbox you can click, and my own conclusions. No framework wars, no 40-minute reads.",
   "lab.count.all": "all",
   "lab.count.ready": "ready",
   "lab.count.building": "under construction",
+  "lab.count.planned": "planned",
   "lab.status.ready": "ready",
   "lab.status.building": "under construction",
   "lab.status.planned": "planned",
@@ -69,6 +70,7 @@ const en = {
   "notFound.text": "The page you were looking for does not exist.",
   "notFound.home": "Go to the home page",
 
+  // consumer: Lab entry pages (plan 2)
   "meta.readingMinutes": "{n} min",
   "meta.sandbox": "sandbox",
 } as const;
@@ -119,6 +121,7 @@ const pl: UiStrings = {
   "lab.count.all": "wszystkie",
   "lab.count.ready": "gotowe",
   "lab.count.building": "w budowie",
+  "lab.count.planned": "planowane",
   "lab.status.ready": "gotowe",
   "lab.status.building": "w budowie",
   "lab.status.planned": "planowane",
@@ -145,6 +148,7 @@ const pl: UiStrings = {
   "notFound.text": "Strona, której szukasz, nie istnieje.",
   "notFound.home": "Wróć na stronę główną",
 
+  // consumer: Lab entry pages (plan 2)
   "meta.readingMinutes": "{n} min",
   "meta.sandbox": "sandbox",
 };

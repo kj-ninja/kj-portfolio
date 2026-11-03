@@ -1,0 +1,124 @@
+---
+import { type Locale, otherLocale } from "../i18n/locales";
+import { t } from "../i18n/ui";
+import { localeUrl } from "../lib/routes";
+
+interface Props {
+  locale: Locale;
+  path: string;
+  switchPath: string;
+}
+
+const { locale, path, switchPath } = Astro.props;
+const section = path.split("/")[0] ?? "";
+// "page" on the section root itself; "true" inside a section (e.g. notes/<slug>), where the link is
+// the current section but not the current page.
+const current = (item: { path: string; section: string }) =>
+  path === item.path ? "page" : section === item.section ? "true" : undefined;
+const other = otherLocale(locale);
+
+const items = [
+  { key: "nav.home", section: "", path: "", icon: "home" },
+  { key: "nav.lab", section: "lab", path: "lab", icon: "lab" },
+  { key: "nav.notes", section: "notes", path: "notes", icon: "notes" },
+  { key: "nav.about", section: "about", path: "about", icon: "about" },
+] as const;
+
+const icons: Record<(typeof items)[number]["icon"], string> = {
+  home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/>',
+  lab: '<path d="M9 3h6"/><path d="M10 3v6L4.5 19a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 9V3"/>',
+  notes: '<path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h6"/>',
+  about: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+};
+const itemClass =
+  "inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:text-ink [&[aria-current]]:bg-accent-soft [&[aria-current]]:text-accent";
+---
+
+<nav
+  aria-label={t(locale, "nav.primary")}
+  class="fixed inset-x-4 bottom-5 z-40 mx-auto flex h-14 max-w-sm items-center justify-between rounded-full border border-line bg-surface-raised/85 px-2 shadow-lg backdrop-blur md:top-5 md:bottom-auto"
+>
+  {
+    items.map((item) => (
+      <a
+        href={localeUrl(locale, item.path)}
+        aria-label={t(locale, item.key)}
+        aria-current={current(item)}
+        class={itemClass}
+      >
+        <svg
+          aria-hidden="true"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          set:html={icons[item.icon]}
+        />
+      </a>
+    ))
+  }
+  <span aria-hidden="true" class="h-6 w-px shrink-0 bg-line"></span>
+  <a
+    id="lang-switch"
+    href={localeUrl(other, switchPath)}
+    hreflang={other}
+    lang={other}
+    aria-label={`${t(locale, "nav.switchLocaleShort")}, ${t(locale, "nav.switchLocale")}`}
+    class="inline-flex h-11 min-w-11 shrink-0 items-center justify-center rounded-full px-2 font-mono text-muted text-sm hover:text-ink"
+    >{t(locale, "nav.switchLocaleShort")}</a
+  >
+  <button
+    id="theme-toggle"
+    type="button"
+    hidden
+    aria-label={t(locale, "theme.toggle")}
+    aria-pressed="false"
+    class="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted hover:text-ink aria-pressed:text-accent"
+  >
+    <svg
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+    </svg>
+  </button>
+</nav>
+
+<script is:inline>
+  // Theme toggle. The explicit choice is stored; without one the OS setting applies.
+  // `aria-pressed` tells assistive tech whether dark mode is on, so it must follow the effective
+  // theme, including OS changes while no choice is stored. Storage errors are swallowed:
+  // the toggle still works for this page view. The button ships `hidden` so that without
+  // JavaScript there is no control that does nothing; this script reveals it.
+  (() => {
+    const button = document.getElementById("theme-toggle");
+    if (!button) return;
+    button.hidden = false;
+    const media = matchMedia("(prefers-color-scheme: dark)");
+    const isDark = () =>
+      document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : media.matches;
+    const reflect = () => button.setAttribute("aria-pressed", String(isDark()));
+    reflect();
+    media.addEventListener("change", reflect);
+    button.addEventListener("click", () => {
+      const next = isDark() ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      try {
+        localStorage.setItem("theme", next);
+      } catch {}
+      reflect();
+    });
+  })();
+</script>
