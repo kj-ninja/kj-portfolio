@@ -79,7 +79,7 @@ const number = (order: number) => String(order).padStart(2, "0");
 <p class="mt-8 text-muted text-sm">{t(locale, "lab.footer")}</p>
 
 <script is:inline>
-  // "Remind me in 7 days" (Plan 2) stores { slug: "YYYY-MM-DD" } under `lab-revisit`:
+  // "Remind me in 7 days" on Lab entry pages (next stage) stores { slug: "YYYY-MM-DD" } under `lab-revisit`:
   // the date the reminder is due. Here we only reveal the badge on rows whose date has come.
   // Any storage or JSON problem means no badges, never an error.
   (() => {

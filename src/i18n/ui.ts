@@ -70,7 +70,7 @@ const en = {
   "notFound.text": "The page you were looking for does not exist.",
   "notFound.home": "Go to the home page",
 
-  // consumer: Lab entry pages (plan 2)
+  // consumer: Lab entry pages (next stage, not built yet)
   "meta.readingMinutes": "{n} min",
   "meta.sandbox": "sandbox",
 } as const;
@@ -148,7 +148,7 @@ const pl: UiStrings = {
   "notFound.text": "Strona, której szukasz, nie istnieje.",
   "notFound.home": "Wróć na stronę główną",
 
-  // consumer: Lab entry pages (plan 2)
+  // consumer: Lab entry pages (next stage, not built yet)
   "meta.readingMinutes": "{n} min",
   "meta.sandbox": "sandbox",
 };
