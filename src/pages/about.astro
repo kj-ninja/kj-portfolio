@@ -1,0 +1,11 @@
+---
+import { t } from "../i18n/ui";
+import Base from "../layouts/Base.astro";
+import AboutView from "../views/AboutView.astro";
+
+const locale = "en";
+---
+
+<Base title={`${t(locale, "nav.about")} — ${t(locale, "site.name")}`} description={t(locale, "about.text")} locale={locale} path="about">
+  <AboutView locale={locale} />
+</Base>

@@ -1,0 +1,11 @@
+---
+import { t } from "../../../i18n/ui";
+import Base from "../../../layouts/Base.astro";
+import NotesIndexView from "../../../views/NotesIndexView.astro";
+
+const locale = "pl";
+---
+
+<Base title={`${t(locale, "nav.notes")} — ${t(locale, "site.name")}`} description={t(locale, "notes.title")} locale={locale} path="notes">
+  <NotesIndexView locale={locale} />
+</Base>

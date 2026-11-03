@@ -1,0 +1,32 @@
+---
+import { type Locale, otherLocale } from "../../../i18n/locales";
+import { t } from "../../../i18n/ui";
+import Base from "../../../layouts/Base.astro";
+import { type NoteEntry, noteEntries, noteSlug } from "../../../lib/content";
+import { alternateLocalesFor, noteSwitchPath } from "../../../lib/switch-path";
+import NoteView from "../../../views/NoteView.astro";
+
+export async function getStaticPaths() {
+  const notes = await noteEntries("pl");
+  return notes.map((note) => ({ params: { slug: noteSlug(note) }, props: { note } }));
+}
+
+interface Props {
+  note: NoteEntry;
+}
+
+const locale = "pl";
+const { note } = Astro.props;
+const slug = noteSlug(note);
+const other = otherLocale(locale);
+const otherSlugs = (await noteEntries(other)).map(noteSlug);
+const switchPath = noteSwitchPath(slug, otherSlugs);
+const alternateLocales = alternateLocalesFor(slug, {
+  [locale]: [slug],
+  [other]: otherSlugs,
+} as Record<Locale, string[]>);
+---
+
+<Base title={`${note.data.title} — ${t(locale, "site.name")}`} description={note.data.summary} locale={locale} path={`notes/${slug}`} switchPath={switchPath} alternateLocales={alternateLocales}>
+  <NoteView locale={locale} note={note} />
+</Base>

@@ -1,0 +1,33 @@
+---
+import Eyebrow from "../components/Eyebrow.astro";
+import type { Locale } from "../i18n/locales";
+import { t } from "../i18n/ui";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+
+const contacts = [{ label: "GitHub", href: "https://github.com/kj-ninja" }];
+---
+
+<header class="flex flex-col gap-3">
+  <Eyebrow>{t(locale, "about.eyebrow")}</Eyebrow>
+  <h1 class="font-display font-semibold text-3xl leading-[1.15] tracking-tight">{t(locale, "about.title")}</h1>
+  <p class="text-lg text-muted leading-relaxed">{t(locale, "about.text")}</p>
+</header>
+
+<section aria-labelledby="contact" class="mt-10 border-line border-t pt-4">
+  <h2 id="contact" class="m-0 font-normal text-base"><Eyebrow as="span">{t(locale, "about.contact.label")}</Eyebrow></h2>
+  <ul role="list" class="m-0 mt-3 flex list-none flex-wrap gap-x-6 gap-y-2 p-0">
+    {contacts.map((c) => <li><a href={c.href} class="inline-flex min-h-11 items-center text-accent hover:underline">{c.label}</a></li>)}
+  </ul>
+</section>
+
+<section aria-labelledby="colophon" class="mt-10 border-line border-t pt-4">
+  <h2 id="colophon" class="m-0 font-normal text-base"><Eyebrow as="span">{t(locale, "about.colophon.label")}</Eyebrow></h2>
+  <p class="mt-3 text-muted">
+    {t(locale, "about.colophon.text")}
+    <a href="https://github.com/kj-ninja/kj-portfolio" class="text-accent underline underline-offset-4">kj-ninja/kj-portfolio</a>
+  </p>
+</section>

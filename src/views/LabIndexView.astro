@@ -1,0 +1,102 @@
+---
+import Eyebrow from "../components/Eyebrow.astro";
+import { groupByStatus } from "../content/select";
+import type { Locale } from "../i18n/locales";
+import { t } from "../i18n/ui";
+import { labEntries, labSlug } from "../lib/content";
+import { foreignLang } from "../lib/ids";
+import { localeUrl } from "../lib/routes";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+
+const entries = await labEntries(locale);
+const { listed, planned, counts } = groupByStatus(entries);
+const number = (order: number) => String(order).padStart(2, "0");
+---
+
+<header class="flex flex-col gap-3">
+  <Eyebrow>{t(locale, "lab.eyebrow")}</Eyebrow>
+  <h1 class="font-display font-semibold text-3xl leading-[1.15] tracking-tight">{t(locale, "lab.title")}</h1>
+  <p class="text-muted">{t(locale, "lab.intro")}</p>
+</header>
+
+<p class="mt-6 flex flex-wrap gap-2 font-mono text-xs">
+  <span class="inline-flex h-8 items-center rounded-full bg-accent-soft px-3 text-accent">{t(locale, "lab.count.all")} · {entries.length}</span>
+  <span class="inline-flex h-8 items-center rounded-full border border-line px-3 text-muted">{t(locale, "lab.count.ready")} · {counts.ready}</span>
+  <span class="inline-flex h-8 items-center rounded-full border border-line px-3 text-muted">{t(locale, "lab.count.building")} · {counts.building}</span>
+  {counts.planned > 0 && <span class="inline-flex h-8 items-center rounded-full border border-line px-3 text-muted">{t(locale, "lab.count.planned")} · {counts.planned}</span>}
+</p>
+
+<ul role="list" aria-label={t(locale, "lab.eyebrow")} class="m-0 mt-6 list-none p-0">
+  {
+    listed.map((entry) => {
+      const slug = labSlug(entry);
+      const isReady = entry.data.status === "ready";
+      const lang = foreignLang(entry, locale);
+      const inner = (
+        <>
+          <span class="flex items-baseline justify-between gap-3 font-mono text-xs">
+            <span class:list={[isReady ? "text-accent" : "text-muted"]}>{number(entry.data.order)}</span>
+            <span class="flex gap-3">
+              <span data-revisit hidden class="text-accent">{t(locale, "lab.revisit.due")}</span>
+              <span class:list={[isReady ? "text-ready" : "text-muted"]}>{t(locale, `lab.status.${entry.data.status}`)}</span>
+            </span>
+          </span>
+          <span class:list={["font-display font-semibold text-lg leading-tight", !isReady && "text-muted"]} lang={lang}>
+            {entry.data.title}
+          </span>
+          <span class="text-muted text-sm" lang={lang}>{entry.data.question}</span>
+          {lang && <span class="font-mono text-muted text-xs">{t(locale, "lab.englishOnly")}</span>}
+        </>
+      );
+      return (
+        <li data-slug={slug} class="border-line border-t">
+          {isReady ? (
+            <a href={localeUrl(locale, `lab/${slug}`)} class="flex flex-col gap-1.5 py-4 hover:text-accent">
+              {inner}
+            </a>
+          ) : (
+            <div class="flex flex-col gap-1.5 py-3.5">{inner}</div>
+          )}
+        </li>
+      );
+    })
+  }
+  {
+    // Planned entries: shorter form at the bottom of the index (spec §5), number and title only.
+    planned.map((entry) => (
+      <li data-slug={labSlug(entry)} class="flex items-baseline gap-2 border-line border-t py-2.5 text-muted text-sm">
+        <span class="font-mono text-xs">{number(entry.data.order)}</span>
+        <span lang={foreignLang(entry, locale)}>{entry.data.title}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<p class="mt-8 text-muted text-sm">{t(locale, "lab.footer")}</p>
+
+<script is:inline>
+  // "Remind me in 7 days" (Plan 2) stores { slug: "YYYY-MM-DD" } under `lab-revisit`:
+  // the date the reminder is due. Here we only reveal the badge on rows whose date has come.
+  // Any storage or JSON problem means no badges, never an error.
+  (() => {
+    try {
+      const raw = localStorage.getItem("lab-revisit");
+      if (!raw) return;
+      const due = JSON.parse(raw);
+      if (!due || typeof due !== "object" || Array.isArray(due)) return;
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+      for (const row of document.querySelectorAll("li[data-slug]")) {
+        const date = due[row.dataset.slug];
+        if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) || date > today) continue;
+        const badge = row.querySelector("[data-revisit]");
+        if (badge) badge.hidden = false;
+      }
+    } catch {}
+  })();
+</script>

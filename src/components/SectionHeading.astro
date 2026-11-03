@@ -1,0 +1,16 @@
+---
+import Eyebrow from "./Eyebrow.astro";
+
+interface Props {
+  id: string;
+  label: string;
+  moreHref?: string;
+  moreLabel?: string;
+}
+const { id, label, moreHref, moreLabel } = Astro.props;
+---
+
+<div class="mb-2 flex items-baseline justify-between">
+  <h2 id={id} class="m-0 font-normal text-base"><Eyebrow as="span">{label}</Eyebrow></h2>
+  {moreHref && moreLabel && <a href={moreHref} class="inline-flex min-h-11 items-center text-accent text-sm hover:underline">{moreLabel}</a>}
+</div>

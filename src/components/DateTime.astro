@@ -1,0 +1,16 @@
+---
+import type { Locale } from "../i18n/locales";
+import { formatDate, isoDate } from "../lib/dates";
+
+// Every rendered date goes through here: a machine-readable `<time datetime>` plus the
+// locale-formatted text (UTC, see src/lib/dates.ts).
+interface Props {
+  locale: Locale;
+  date: Date;
+  style?: "medium" | "long";
+  class?: string;
+}
+const { locale, date, style = "medium", class: className } = Astro.props;
+---
+
+<time datetime={isoDate(date)} class={className}>{formatDate(locale, date, style)}</time>

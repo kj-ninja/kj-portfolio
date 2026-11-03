@@ -1,0 +1,29 @@
+---
+import { render } from "astro:content";
+import DateTime from "../components/DateTime.astro";
+import Eyebrow from "../components/Eyebrow.astro";
+import type { Locale } from "../i18n/locales";
+import { t } from "../i18n/ui";
+import type { NoteEntry } from "../lib/content";
+import { localeUrl } from "../lib/routes";
+
+interface Props {
+  locale: Locale;
+  note: NoteEntry;
+}
+const { locale, note } = Astro.props;
+const { Content } = await render(note);
+---
+
+<article class="flex flex-col gap-6">
+  <header class="flex flex-col gap-3">
+    <Eyebrow>{t(locale, "notes.eyebrow")}</Eyebrow>
+    <h1 class="font-display font-semibold text-3xl leading-[1.15] tracking-tight">{note.data.title}</h1>
+    <p class="text-lg text-muted">{note.data.summary}</p>
+    <p class="font-mono text-muted text-xs"><DateTime locale={locale} date={note.data.publishedOn} style="long" class="font-mono" /></p>
+  </header>
+  <div class="prose-note">
+    <Content />
+  </div>
+  <p><a href={localeUrl(locale, "notes")} class="text-accent hover:underline">← {t(locale, "notes.backToIndex")}</a></p>
+</article>

@@ -1,0 +1,94 @@
+---
+import DateTime from "../components/DateTime.astro";
+import Eyebrow from "../components/Eyebrow.astro";
+import ListRow from "../components/ListRow.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import type { Locale } from "../i18n/locales";
+import { t } from "../i18n/ui";
+import { labEntries, labSlug, noteEntries, noteSlug, workItems } from "../lib/content";
+import { foreignLang } from "../lib/ids";
+import { localeUrl } from "../lib/routes";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+
+const work = await workItems();
+const lab = (await labEntries(locale)).slice(0, 3);
+const notes = (await noteEntries(locale)).slice(0, 3);
+const statusTone = { live: "ready", repo: "muted", "in-progress": "accent" } as const;
+---
+
+<header class="flex flex-col gap-4">
+  <Eyebrow>{t(locale, "home.eyebrow")}</Eyebrow>
+  <h1 class="font-display font-semibold text-4xl leading-[1.15] tracking-tight sm:text-5xl">
+    {t(locale, "home.headline.before")}<span class="text-accent">{t(locale, "home.headline.accent")}</span>{t(locale, "home.headline.after")}
+  </h1>
+  <p class="text-lg text-muted leading-relaxed">{t(locale, "home.lead")}</p>
+  <div class="flex flex-wrap gap-2.5 pt-1">
+    <a href={localeUrl(locale, "lab")} class="inline-flex min-h-11 items-center rounded-full bg-accent px-5 font-medium text-surface-raised">
+      {t(locale, "home.cta.lab")}
+    </a>
+    <a href="#work" class="inline-flex min-h-11 items-center rounded-full border border-line px-5 font-medium">{t(locale, "home.cta.work")}</a>
+  </div>
+</header>
+
+<section aria-labelledby="now" class="mt-10 flex flex-col gap-2 border-line border-y py-4">
+  <h2 id="now" class="m-0 font-normal text-base"><Eyebrow as="span">{t(locale, "home.now.label")}</Eyebrow></h2>
+  <p>{t(locale, "home.now.text")}</p>
+</section>
+
+<section id="work" aria-labelledby="work-heading" class="mt-10">
+  <SectionHeading id="work-heading" label={t(locale, "home.work.label")} />
+  <ul role="list" class="m-0 list-none p-0">
+    {
+      work.map((item) => (
+        <ListRow
+          href={item.data.url ?? item.data.repo}
+          title={item.data.name}
+          meta={item.data.what[locale]}
+          aside={t(locale, `work.status.${item.data.status}`)}
+          asideTone={statusTone[item.data.status]}
+        />
+      ))
+    }
+  </ul>
+</section>
+
+<section aria-labelledby="lab-heading" class="mt-10">
+  <SectionHeading id="lab-heading" label={t(locale, "home.lab.label")} moreHref={localeUrl(locale, "lab")} moreLabel={t(locale, "home.lab.all")} />
+  <ul role="list" class="m-0 list-none p-0">
+    {
+      lab.map((entry) => (
+        <ListRow
+          href={entry.data.status === "ready" ? localeUrl(locale, `lab/${labSlug(entry)}`) : undefined}
+          index={String(entry.data.order).padStart(2, "0")}
+          title={entry.data.title}
+          lang={foreignLang(entry, locale)}
+          meta={entry.data.status === "ready" ? entry.data.question : t(locale, "lab.status.building")}
+          metaLang={entry.data.status === "ready" ? foreignLang(entry, locale) : undefined}
+          aside={entry.data.status === "ready" ? t(locale, "lab.status.ready") : undefined}
+          asideTone="ready"
+        />
+      ))
+    }
+  </ul>
+</section>
+
+<section aria-labelledby="notes-heading" class="mt-10">
+  <SectionHeading id="notes-heading" label={t(locale, "home.notes.label")} moreHref={localeUrl(locale, "notes")} moreLabel={t(locale, "home.notes.all")} />
+  {
+    notes.length === 0 ? (
+      <p class="text-muted">{t(locale, "notes.empty")}</p>
+    ) : (
+      <ul role="list" class="m-0 list-none p-0">
+        {notes.map((note) => (
+          <ListRow href={localeUrl(locale, `notes/${noteSlug(note)}`)} title={note.data.title} metaMono>
+            <DateTime slot="meta" locale={locale} date={note.data.publishedOn} />
+          </ListRow>
+        ))}
+      </ul>
+    )
+  }
+</section>
