@@ -1,0 +1,17 @@
+---
+title: workers_dev switches off the moment you add a route
+summary: Adding a custom domain to a Cloudflare Worker silently removes its workers.dev URL unless you keep it on by hand.
+publishedOn: 2026-10-31
+tags: [cloudflare, portfolio]
+---
+
+When this site got its domain, `wrangler.jsonc` gained a `routes` entry with `custom_domain: true`.
+Wrangler reacts to that by defaulting `workers_dev` to `false`: the `portfolio.<account>.workers.dev`
+address stops serving on the next deploy.
+
+That default is reasonable for a product and wrong for a migration. The old address was the only
+fallback while DNS and the certificate were still being confirmed. The fix is one explicit line,
+`"workers_dev": true`, with a comment saying when to flip it back.
+
+The lesson is about defaults that change when a neighbouring setting appears. Read the
+configuration reference for the field you did not touch, not only for the one you added.

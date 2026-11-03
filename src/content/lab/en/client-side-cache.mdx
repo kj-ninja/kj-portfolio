@@ -1,0 +1,11 @@
+---
+title: Client-side cache
+question: Why does one screen fetch the same data five times, and what does staleTime actually change?
+order: 1
+status: building
+readingMinutes: 6
+---
+
+Five taps on the same button: five requests, or one. The difference is a cache with a notion of
+freshness. This entry opens with the raw `useEffect` + `fetch` version, then adds a cache with
+`staleTime`, and lets you watch the request counter.

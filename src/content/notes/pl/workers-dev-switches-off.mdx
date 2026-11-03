@@ -1,0 +1,17 @@
+---
+title: workers_dev wyłącza się w chwili, gdy dodasz route
+summary: Dodanie własnej domeny do Workera Cloudflare po cichu usuwa jego adres workers.dev, jeśli nie zostawisz go włączonego ręcznie.
+publishedOn: 2026-10-31
+tags: [cloudflare, portfolio]
+---
+
+Gdy ta strona dostała domenę, w `wrangler.jsonc` pojawił się wpis `routes` z `custom_domain: true`.
+Wrangler reaguje na to, ustawiając `workers_dev` domyślnie na `false`: adres
+`portfolio.<konto>.workers.dev` przestaje działać przy następnym deployu.
+
+Ten domyślny wybór jest rozsądny dla produktu i zły dla migracji. Stary adres był jedynym
+zapasem, zanim DNS i certyfikat zostały potwierdzone. Poprawka to jedna jawna linia,
+`"workers_dev": true`, z komentarzem, kiedy ją wyłączyć.
+
+Lekcja dotyczy domyślnych wartości, które zmieniają się, gdy pojawia się sąsiednie ustawienie.
+Czytaj dokumentację pola, którego nie dotykałeś, nie tylko tego, które dodałeś.
