@@ -43,14 +43,13 @@ i18n: {
   defaultLocale: "en",
   locales: ["en", "pl"],
   routing: { prefixDefaultLocale: false },
-  fallback: { pl: "en" },
 }
 ```
 
-`fallback: { pl: "en" }` means a Polish URL without a Polish page redirects to the English page instead of 404 (verified in `node_modules/astro/dist/types/public/config.d.ts`, `i18n.fallback`).
+No i18n `fallback` is configured. Every route exists in both locales as a file (`src/pages/*.astro` and `src/pages/pl/*.astro`; the bilingual 404 page is shared), so a fallback would add nothing: it is route-level only (dynamic routes get no per-slug fallback), and in this build it only produced a `/pl/404/` redirect stub with HTTP 200 and a route-conflict warning. A direct hit on a Polish URL without a page returns 404.
 
-- UI strings live in `src/i18n/en.ts` and `src/i18n/pl.ts` with one shared TypeScript type, so a missing key is a type error (`astro check` fails).
-- Content is per locale in the collections (§5). Rule: **English is mandatory for every entry; Polish is mandatory for entries with `status: "ready"`** and optional otherwise. A zod `superRefine` in `content.config.ts` enforces it at build time: a ready entry without a `pl` counterpart fails `astro build`.
+- UI strings live in one typed table, `src/i18n/ui.ts`: the English object defines the keys (`UiKey`) and the Polish object is typed `Record<UiKey, string>`, so a missing key is a type error (`astro check` fails).
+- Content is per locale in the collections (§5). Rule: **English is mandatory for every entry; Polish is mandatory for entries with `status: "ready"`** and optional otherwise. A loader wrapper (`requirePolishForReady` in `src/content/loaders.ts`) enforces it at build time after the glob loader runs: a ready entry without a `pl` counterpart fails `astro build`.
 - `<html lang>` follows the locale; `hreflang` alternates and a canonical URL are emitted per page.
 - The language switch keeps the current slug. When the other locale has no page (allowed only for non-ready entries), the switch links to the other locale's Lab index.
 - Dates and numbers are formatted with `Intl` per locale.
@@ -89,9 +88,9 @@ const lab = defineCollection({
 });
 ```
 
-`reference("lab")` and `reference("notes")` make a wrong slug a build error (Astro content references, verified present in `node_modules/astro/dist/content/runtime.js`). Links between Notes and Lab therefore cannot rot silently.
+`reference("lab")` and `reference("notes")` type the links; Astro 7.4.4 only logs a wrong slug, so `assertReferences()` in `src/lib/content.ts` turns it into a build error. Links between Notes and Lab therefore cannot rot silently.
 
-Status semantics: `ready` is published with sandbox and My take; `building` is listed with its question and shown as "under construction"; `planned` is listed in a shorter form at the bottom of the index. Only `ready` entries have a detail page; `building` and `planned` ids render no route (the index items are not links).
+Status semantics: `ready` is published with sandbox and My take; `building` is listed with its question and shown as "under construction"; `planned` is listed in a shorter form at the bottom of the index. Only `ready` entries have a detail page; `building` and `planned` ids render no route (the index items are not links). When an entry has both an English and a Polish file, both must have the same `status` and `order`; `requirePolishForReady` fails the build otherwise.
 
 ### 5.2 `notes`
 
@@ -148,7 +147,7 @@ Light: surface warm off-white (≈ `#f6f3ee`), ink near-black blue (≈ `#1f2430
 
 ### 8.2 Typography
 
-Display: a self-hosted variable sans with tight tracking for headings (Inter Tight, latin + latin-ext subsets for Polish, `font-display: swap`, ≈ 60 KB). Body: system UI stack (no download). Metadata and code: `ui-monospace` stack. One display font is the compromise between "has something" and the performance budget; if Lighthouse shows CLS from the swap, the fallback is a size-adjusted local font via `@font-face` descriptors.
+Display: a self-hosted variable sans with tight tracking for headings (Inter Tight, latin + latin-ext subsets for Polish, `font-display: swap`; latin-ext is about 90 KB, latin 45 KB). Body: system UI stack (no download). Metadata and code: `ui-monospace` stack. One display font is the compromise between "has something" and the performance budget; if Lighthouse shows CLS from the swap, the fallback is a size-adjusted local font via `@font-face` descriptors.
 
 ### 8.3 Layout
 
@@ -156,7 +155,7 @@ Single column, max width 42 rem for prose, 48 rem for sandboxes; 16 px side gutt
 
 ### 8.4 Theme mechanics
 
-- Tokens are defined on `:root` (light) and redefined under `:root[data-theme="dark"]` and under `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`. Tailwind's `dark:` variant is remapped with `@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *))` plus the media query for the no-preference case.
+- Tokens are defined on `:root` (light) and redefined under `:root[data-theme="dark"]` and under `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`. No `dark:` variant is configured: components use tokens, which switch with `data-theme` and the media query.
 - An inline script in `<head>` (before any CSS paint) reads `localStorage.theme` and sets `data-theme`; wrapped in `try/catch`, so a blocked storage falls back to the OS setting. The toggle writes the explicit choice. Until a choice is made the OS setting applies; there is no UI to return to "follow system" in this stage (clearing site data does it).
 - `color-scheme` follows the active theme so form controls and scrollbars match.
 
@@ -173,8 +172,10 @@ Per page: `<title>`, description, canonical, `hreflang` for `en`/`pl`/`x-default
 | Theme script                         | storage blocked or throws                     | OS theme applies; toggle still works for the session (state in memory)                                                                                            |
 | `localStorage` (revisit list, theme) | unavailable or full                           | controls hide or degrade; no exception reaches the page                                                                                                           |
 | i18n                                 | ready entry missing PL                        | build fails with the refine message; nothing deploys                                                                                                              |
-| i18n                                 | non-ready entry missing PL                    | language switch targets the Lab index; Astro fallback redirects direct hits to EN                                                                                 |
-| Content references                   | wrong `related`/`notes` slug                  | build fails (`reference()`)                                                                                                                                       |
+| i18n                                 | PL file without an English counterpart        | build fails (English is mandatory)                                                                                                                                |
+| i18n                                 | EN and PL files disagree on `status`/`order`  | build fails, the error lists every mismatched slug                                                                                                                |
+| i18n                                 | non-ready entry missing PL                    | language switch targets the Lab index; the index lists the English entry marked "English only"; direct hits on an unlinked Polish detail URL return 404           |
+| Content references                   | wrong `related`/`notes` slug                  | build fails (`assertReferences()`; `reference()` alone only warns)                                                                                                |
 | Fonts                                | font fails to load                            | system fallback, `font-display: swap`, size-adjust fallback if CLS appears                                                                                        |
 | CI                                   | axe violation in one theme or locale          | PR blocked; both themes × both locales are tested on every page type                                                                                              |
 
@@ -182,7 +183,7 @@ No runtime calls to external services exist, so there is no amplification and no
 
 ## 11. Testing
 
-Unit (Vitest, to add): zod schemas (ready entry without `takeWrittenOn` rejected; wrong reference rejected by Astro build test), i18n completeness (every key in `en` exists in `pl`), `FakeServer` (latency, failure injection, counter), cache sandbox logic (`staleTime` 0 / 5 s / 60 s request counts).
+Unit (Vitest, to add): zod schemas (ready entry without `takeWrittenOn` rejected; a wrong reference fails the build via `assertReferences` (pure check unit-tested in `src/content/references.test.ts`; build-level proof done manually)), i18n completeness (every key in `en` exists in `pl`), `FakeServer` (latency, failure injection, counter), cache sandbox logic (`staleTime` 0 / 5 s / 60 s request counts).
 
 E2E (Playwright against `wrangler dev`): every route in both locales returns 200 with correct `lang` and `hreflang`; Home ships no React (asserts no `astro-island` and no `.js` other than the inline theme script); theme toggle sets `data-theme`, persists across reload, and the first paint has no flash (checks the inline script is in `<head>` and `data-theme` is set before `DOMContentLoaded`); language switch keeps the slug; Lab 01 sandbox: five taps with 60 s ⇒ right counter 1, left 5; reduced-motion media emulation renders identical numbers; no network requests from Lab pages except same-origin assets; axe WCAG 2.2 AA on Home, Lab index, Lab 01, Notes index, About, 404 in light and dark, EN and PL; JS budget test on each Lab page.
 
@@ -203,4 +204,4 @@ Unchanged: `wrangler.jsonc`, CI workflow structure (new scripts are appended to 
 
 ## 14. Learning-log topics raised by this design
 
-Error boundary per island (each island is its own React tree); `reference()` validation; theme without flash (inline head script); i18n fallback vs 404; JS budget as a CI test; `font-display` and size-adjust against CLS. Entries T16–T20 already cover the Lab definition, simulated backends, per-page JS budget, reduced motion and build-time references; the rest are added when implemented.
+Error boundary per island (each island is its own React tree); build-time reference check (`assertReferences`, because `reference()` alone only warns); theme without flash (inline head script); i18n fallback vs 404; JS budget as a CI test; `font-display` and size-adjust against CLS. Entries T16–T28 now exist and cover all of these except the error boundary per island, which is added when the first island is implemented.

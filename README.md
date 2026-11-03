@@ -23,14 +23,35 @@ bun run preview      # wrangler dev on http://127.0.0.1:8788
 
 ## Checks
 
-| Command            | What it checks                                                                         |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| `bun run lint`     | Biome lint and formatting                                                              |
-| `bun run check`    | `astro check`: TypeScript and Astro templates                                          |
-| `bun run build`    | static build into `dist/`                                                              |
-| `bun run test:e2e` | Playwright smoke tests and axe (WCAG 2.2 AA) against `wrangler dev`; run `build` first |
+| Command             | What it checks                                                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `bun run lint`      | Biome lint and formatting                                                                                         |
+| `bun run check`     | `astro check`: TypeScript and Astro templates                                                                     |
+| `bun run build`     | static build into `dist/`                                                                                         |
+| `bun run test:unit` | Vitest: schemas, i18n strings, loaders, references, ids, select, switch-path/alternates, tokens parity, dates     |
+| `bun run test:e2e`  | Playwright smoke tests and axe (WCAG 2.2 AA, light and dark, EN and PL) against `wrangler dev`; run `build` first |
 
 CI (`.github/workflows/ci.yml`) runs all of them on every pull request and on `main`.
+
+## Develop
+
+- `bun run dev` – Astro dev server.
+- `bun run check && bun run lint` – types, templates, Biome.
+- `bun run test:unit` – Vitest (schemas, i18n strings, loaders, references, ids, select, switch-path/alternates, tokens parity, dates).
+- `bun run build && bun run test:e2e` – Playwright against `wrangler dev` serving `dist/`.
+- `bun run og` – regenerate `public/og/*.png` after changing `scripts/og/template.html`.
+- `OG_CHROMIUM_PATH=<path> bun run og` – optional: points the OG renderer at a specific Chromium build when Playwright's own build is not installed.
+
+## Content
+
+- `src/content/lab/<locale>/<slug>.mdx` – Lab entries. English is mandatory; Polish is mandatory for `status: ready` (build fails otherwise).
+- A Polish file needs its English counterpart (build fails otherwise).
+- EN and PL files of one Lab entry must have the same `status` and `order` (build fails otherwise).
+- Wrong `related`/`notes`/`lab` slugs fail the build (`assertReferences`).
+- References are locale-prefixed ids (`en/<slug>`); a Polish note pointing at a Lab entry without a Polish file uses `en/<slug>`.
+- `src/content/notes/<locale>/<slug>.mdx` – Notes.
+- `src/content/work.yaml` – Work list on the home page.
+- UI copy lives in `src/i18n/ui.ts`.
 
 ## Deploy
 
