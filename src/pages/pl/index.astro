@@ -1,0 +1,11 @@
+---
+import { t } from "../../i18n/ui";
+import Base from "../../layouts/Base.astro";
+import HomeView from "../../views/HomeView.astro";
+
+const locale = "pl";
+---
+
+<Base title={t(locale, "site.title")} description={t(locale, "site.description")} locale={locale} path="">
+  <HomeView locale={locale} />
+</Base>

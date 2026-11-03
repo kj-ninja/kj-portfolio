@@ -1,0 +1,11 @@
+---
+import { t } from "../../../i18n/ui";
+import Base from "../../../layouts/Base.astro";
+import LabIndexView from "../../../views/LabIndexView.astro";
+
+const locale = "pl";
+---
+
+<Base title={`${t(locale, "nav.lab")} — ${t(locale, "site.name")}`} description={t(locale, "lab.intro")} locale={locale} path="lab">
+  <LabIndexView locale={locale} />
+</Base>

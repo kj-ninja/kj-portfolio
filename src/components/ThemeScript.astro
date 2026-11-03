@@ -1,0 +1,14 @@
+---
+// Runs before any CSS paints. Reads the explicit theme choice (set by the dock toggle) and
+// applies it as `data-theme`. No choice = no attribute = OS setting via prefers-color-scheme.
+// `try/catch`: localStorage can throw (blocked storage, private mode); the page must still render.
+---
+
+<script is:inline>
+  (() => {
+    try {
+      const theme = localStorage.getItem("theme");
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+    } catch {}
+  })();
+</script>

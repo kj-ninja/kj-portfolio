@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      /* Local files only: the template never touches the network. latin-ext covers Polish diacritics. */
+      @font-face {
+        font-family: "Inter Tight Variable";
+        font-weight: 100 900;
+        src: url("../../node_modules/@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2") format("woff2-variations");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      @font-face {
+        font-family: "Inter Tight Variable";
+        font-weight: 100 900;
+        src: url("../../node_modules/@fontsource-variable/inter-tight/files/inter-tight-latin-ext-wght-normal.woff2") format("woff2-variations");
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+      /* Colours are the light-theme tokens from src/styles/global.css; update them together. */
+      html, body { margin: 0; }
+      body {
+        width: 1200px; height: 630px; box-sizing: border-box; padding: 72px;
+        background: oklch(96.2% 0.006 85); color: oklch(25% 0.025 270);
+        font-family: "Inter Tight Variable", ui-sans-serif, system-ui, sans-serif;
+        display: flex; flex-direction: column; justify-content: space-between;
+      }
+      p { margin: 0; }
+      .eyebrow { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 24px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(48% 0.02 270); }
+      h1 { margin: 0; font-size: 72px; line-height: 1.1; letter-spacing: -0.02em; font-weight: 600; max-width: 1000px; text-wrap: balance; }
+      h1 .accent { color: oklch(50% 0.19 40); }
+      .url { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 28px; color: oklch(48% 0.02 270); }
+    </style>
+  </head>
+  <body>
+    <!-- Text comes from src/lib/og-text.ts (ui.ts), filled in by scripts/og/render.ts. -->
+    <p class="eyebrow" id="eyebrow"></p>
+    <h1><span id="before">Open Graph image</span><span class="accent" id="accent"></span><span id="after"></span></h1>
+    <p class="url">krzysztofjakubiak.com</p>
+  </body>
+</html>

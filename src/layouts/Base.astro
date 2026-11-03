@@ -1,24 +1,71 @@
 ---
+import "@fontsource-variable/inter-tight";
 import "../styles/global.css";
+import Dock from "../components/Dock.astro";
+import ThemeScript from "../components/ThemeScript.astro";
+import { type Locale, locales } from "../i18n/locales";
+import { t } from "../i18n/ui";
+import { alternates, canonical } from "../lib/routes";
 
 interface Props {
   title: string;
   description: string;
+  locale: Locale;
+  /** Locale-less path without leading slash: "", "lab", "notes/foo". */
+  path: string;
+  /** Where the language switch goes when the same path has no page in the other locale. */
+  switchPath?: string;
+  ogImage?: string;
+  /** Emits robots noindex and drops canonical/hreflang/og:url (for pages with no real URL, e.g. the 404). */
+  noindex?: boolean;
+  /** Locales that have a page at this path; hreflang is emitted only for these. Defaults to all. */
+  alternateLocales?: Locale[];
 }
 
-const { title, description } = Astro.props;
+const {
+  title,
+  description,
+  locale,
+  path,
+  switchPath = path,
+  ogImage = `/og/${locale}.png`,
+  noindex = false,
+  alternateLocales = [...locales],
+} = Astro.props;
+const canonicalHref = canonical(locale, path);
+const ogImageHref = new URL(ogImage, Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
+    <ThemeScript />
     <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={canonicalHref} />}
+    {!noindex && alternates(path, alternateLocales).map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {!noindex && <meta property="og:url" content={canonicalHref} />}
+    <meta property="og:image" content={ogImageHref} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={locale === "pl" ? "pl_PL" : "en_US"} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
   </head>
   <body class="min-h-dvh bg-surface font-sans text-ink antialiased">
-    <main class="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-6 px-4 py-16">
+    <a
+      href="#content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-full focus:bg-surface-raised focus:px-4 focus:py-2"
+      >{t(locale, "skip.toContent")}</a
+    >
+    <Dock locale={locale} path={path} switchPath={switchPath} />
+    <main id="content" class="mx-auto w-full max-w-2xl px-4 pt-14 pb-28 md:pt-28 md:pb-16">
       <slot />
     </main>
   </body>

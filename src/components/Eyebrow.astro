@@ -1,0 +1,8 @@
+---
+interface Props {
+  as?: "p" | "span";
+}
+const { as: Tag = "p" } = Astro.props;
+---
+
+<Tag class="font-mono text-muted text-xs uppercase tracking-[0.08em]"><slot /></Tag>

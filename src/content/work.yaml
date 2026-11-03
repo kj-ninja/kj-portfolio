@@ -1,0 +1,18 @@
+- id: forge
+  name: Forge
+  what:
+    en: Training journal for Hyrox athletes. Auth, Postgres, a handful of testers.
+    pl: Dziennik treningowy dla zawodników Hyrox. Logowanie, Postgres, kilku testerów.
+  status: live
+- id: garmin-coach
+  name: garmin-coach
+  what:
+    en: Running log and race plan on your own Garmin data. Runs on your machine.
+    pl: Dziennik biegowy i plan startowy na własnych danych z Garmina. Działa lokalnie.
+  status: repo
+- id: newsletter-stories
+  name: Newsletter Stories
+  what:
+    en: Turns a newsletter inbox into illustrated posts.
+    pl: Zamienia skrzynkę z newsletterami w ilustrowane posty.
+  status: in-progress
